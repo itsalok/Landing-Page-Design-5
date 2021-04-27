@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Title</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="Assets/css/style.css">
+</head>
+
+<body>
+
+    <div class="container-fluid background">
+        <img src="http://clipart-library.com/images/riLoyRX5T.gif" width="180" class="bgBirds">
+        <canvas id="canvas"></canvas>
+        <nav class="navbar navbar-light">
+            <a class="navbar-brand" href="#">
+                <h1 class="logo">Nature</h1>
+            </a>
+            <nav class="navbar navbar-light">
+                <a class="navbar-brand" href="#">
+                    <img src="Assets/image/toggle.png" width="50" height="20" alt="">
+                </a>
+            </nav>
+        </nav>
+        <div class="container mainBox">
+            <div class="row">
+                <div class="col-md-6 py-3 textBox">
+                    <h1>We can save the<br><span>Earth</span></h1>
+                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Minima atque sint totam blanditiis
+                        possimus. Quam recusandae rem omnis asperiores ea laborum vel veniam, temporibus cum non iusto
+                        voluptatem suscipit! Aut?</p>
+                    <button type="button" class="btn btn-primary btn-md mt-3">Join us</button>
+                </div>
+                <div class="col-md-6 justify-content-end d-flex imgBox">
+                    <img class="img-fluid" src="Assets/image/001img-tree.png" class="tree" alt="">
+                    <ul class="sci">
+                        <li><a href="#"><img src="Assets/image/facebook.png" alt=""></a></li>
+                        <li><a href="#"><img src="Assets/image/instagram.png" alt=""></a></li>
+                        <li><a href="#"><img src="Assets/image/twitter.png" alt=""></a></li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 ml-3 textShadowBox">
+                    <h5>Defenders of Earth</h5>
+                    <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ab, magni! Ea sunt quidem
+                        necessitatibus vero.</p>
+                </div>
+                <div class="col-md-4  ml-4 textShadowBox">
+                    <h5>How to save Trees</h5>
+                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptates recusandae maxime explicabo
+                        voluptas sequi illum.</p>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+<!---------------------------------------------------------------------------------------------->
+
+
+    <script>
+        const canvas = document.getElementById('canvas');
+
+        let canvasWidth;
+        let canvasHeight;
+
+        const resizeCanvas = () => {
+            canvasWidth = window.innerWidth
+            canvasHeight = window.innerHeight
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+        }
+
+        resizeCanvas();
+
+        addEventListener('resize', event => {
+            resizeCanvas();
+            init();
+        });
+
+        const getRandomArbitrary = (min, max, roundN = 0) => {
+            roundN = Number(`1e${roundN}`);
+            return Math.floor((Math.random() * (max - min) + min) * roundN) / roundN;
+        }
+
+        const getRandomInt = (min, max) =>
+            Math.floor(Math.random() * (max - min + 1)) + min;
+
+        const randDirection = (min, max, roundN) => {
+            let result = 0;
+            while (result === 0) {
+                result = getRandomArbitrary(min, max, roundN);
+            }
+            return result;
+        }
+
+        const ctx = canvas.getContext('2d');
+
+        const START_COUNT_PARTICLES = 10;
+        const COUNT_PARTICLES = 1000;
+        const START_THROUGH_PARTICLES = 5;
+        const COUNT_THROUGH_PARTICLES = 100;
+        const PI2 = Math.PI * 2;
+
+        class Particle {
+            constructor({ x, y, vx, vy, length, color }) {
+                this.x = x;
+                this.y = y;
+                this.length = length;
+                this.velocity = Object.create(null);
+                this.velocity.x = vx;
+                this.velocity.y = vy;
+                this.color = color;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.beginPath();
+                ctx.strokeStyle = 1;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = this.color;
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x + this.length * this.velocity.x, this.y + this.length * this.velocity.y);
+                ctx.stroke();
+                ctx.closePath();
+                ctx.restore();
+            }
+
+            update() {
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+
+                if (this.y > canvasHeight) {
+                    this.y = -this.length;
+                    this.x = getRandomArbitrary(0, canvasWidth);
+                }
+
+                this.draw();
+            }
+
+            static createNewParticle() {
+                let options = Object.create(null);
+                options.length = getRandomArbitrary(.1, 1, 2);
+                options.x = getRandomArbitrary(0, canvasWidth);
+                options.y = -options.length;
+                options.vx = getRandomArbitrary(-2, 2, 2);
+                options.vy = getRandomArbitrary(10, 20, 2);
+                options.color = 'rgba(174, 194, 224, .5)';
+                return new this(options);
+            }
+        }
+
+        class ThroughParticle extends Particle {
+            // var speedRainTrough = 25;
+            constructor(options) {
+                super(options);
+                this.opacity = options.opacity;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.beginPath();
+                ctx.strokeStyle = 1;
+                ctx.lineCap = 'round';
+                let grd = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.length);
+                grd.addColorStop(0, 'rgba(255,255,255,0)');
+                grd.addColorStop(1, `rgba(255,255,255,${this.opacity})`);
+                ctx.strokeStyle = grd;
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x, this.y + this.length);
+                ctx.stroke();
+                ctx.closePath();
+                ctx.restore();
+            }
+
+            update() {
+                // this.x += this.velocity.x;
+                this.y += this.velocity.y;
+
+                if (this.y > canvasHeight) {
+                    this.y = -this.length;
+                    this.x = getRandomArbitrary(0, canvasWidth);
+                }
+
+                this.draw();
+            }
+
+            static createNewThroughParticle() {
+                let options = Object.create(null);
+                options.length = getRandomArbitrary(1, 830);
+                options.x = getRandomArbitrary(0, canvasWidth);
+                options.y = -options.length;
+                options.opacity = getRandomArbitrary(0, .25, 2);
+                options.vx = getRandomArbitrary(-2, 2, 2);
+                options.vy = getRandomArbitrary(10, 20, 2);
+                return new this(options);
+            }
+        }
+
+        let particles = new Set();
+        let throughParticles = new Set();
+        let req;
+
+        const init = () => {
+            particles.clear();
+            throughParticles.clear();
+            cancelAnimationFrame(req);
+
+
+            const animate = () => {
+                ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+
+                if (throughParticles.size < COUNT_THROUGH_PARTICLES) {
+                    let throughParticle = ThroughParticle.createNewThroughParticle();
+                    throughParticles.add(throughParticle);
+                    throughParticle.draw();
+                }
+
+                if (particles.size < COUNT_PARTICLES) {
+                    let particle = Particle.createNewParticle();
+                    particles.add(particle);
+                    particle.draw();
+                }
+
+                for (let throughParticle of throughParticles) throughParticle.update();
+
+                for (let particle of particles) particle.update();
+
+                req = requestAnimationFrame(animate);
+            }
+
+            req = requestAnimationFrame(animate);
+        }
+
+        init();
+
+        canvas.addEventListener('click', event => {
+            init();
+        });
+    </script>
+
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
